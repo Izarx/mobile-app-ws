@@ -1,17 +1,34 @@
 package com.softserveinc.app.ws.service.impl;
 
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.softserveinc.app.ws.UserRepository;
+import com.softserveinc.app.ws.io.entity.UserEntity;
 import com.softserveinc.app.ws.service.UserService;
 import com.softserveinc.app.ws.shared.dto.UserDto;
 
 @Service
 public class UserServiceImpl implements UserService {
 
+	@Autowired
+	UserRepository repository;
+	
 	@Override
 	public UserDto createUser(UserDto user) {
+		UserEntity userEntity = new UserEntity();
+		BeanUtils.copyProperties(user, userEntity);
 		
-		return null;
+		userEntity.setEncryptedPassword("test");
+		userEntity.setUserId("testUserId");
+		
+		UserEntity storedUserDetail = repository.save(userEntity);
+		
+		UserDto returnValue = new UserDto();
+		BeanUtils.copyProperties(storedUserDetail, returnValue);
+		
+		return returnValue;
 	}
 
 }
