@@ -7,23 +7,32 @@ import org.springframework.stereotype.Service;
 import com.softserveinc.app.ws.UserRepository;
 import com.softserveinc.app.ws.io.entity.UserEntity;
 import com.softserveinc.app.ws.service.UserService;
+import com.softserveinc.app.ws.shared.Utils;
 import com.softserveinc.app.ws.shared.dto.UserDto;
 
 @Service
 public class UserServiceImpl implements UserService {
 
 	@Autowired
-	UserRepository repository;
+	UserRepository userRepository;
+	
+	@Autowired
+	Utils utils;
 	
 	@Override
 	public UserDto createUser(UserDto user) {
+		
+		if (userRepository.findByEmail(user.getEmail()) != null) {
+			throw new RuntimeException("Record already exists!");
+		}
+		
 		UserEntity userEntity = new UserEntity();
 		BeanUtils.copyProperties(user, userEntity);
 		
+		userEntity.setUserId(utils.generateUserId(30));
 		userEntity.setEncryptedPassword("test");
-		userEntity.setUserId("testUserId");
 		
-		UserEntity storedUserDetail = repository.save(userEntity);
+		UserEntity storedUserDetail = userRepository.save(userEntity);
 		
 		UserDto returnValue = new UserDto();
 		BeanUtils.copyProperties(storedUserDetail, returnValue);
